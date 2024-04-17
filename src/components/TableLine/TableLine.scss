@@ -1,0 +1,22 @@
+.tableLine {
+  display: flex;
+  width: 100%;
+
+  padding-top: 10px;
+  align-items: center;
+  // border-bottom: 1px solid gre;
+  &_num {
+    padding-right: 30px;
+    width: 10px;
+
+  }
+  &_serialNum {
+    flex: 4;
+  }
+  &_fixTime {
+    flex: 4;
+  }
+  &_payload {
+    flex: 4;
+  }
+}

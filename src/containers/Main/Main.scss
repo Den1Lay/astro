@@ -1,0 +1,30 @@
+@import '@/styles/consts.scss';
+
+.main {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  &__top {
+    display: flex;
+    flex:1;
+  }
+  &__line {
+    flex:1
+  }
+  &__table {
+    flex: 12
+  }
+}
+
+
+.table_header {
+  width: 100%;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  border-bottom: $silverGrey 1px solid;
+  display: flex;
+  &__snap {
+    width: 20px;
+  }
+}

@@ -1,0 +1,27 @@
+@import url('https://cdnjs.cloudflare.com/ajax/libs/antd/5.16.0/reset.css');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap');
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #fff;
+  overflow: hidden;
+}
+
+div, p, h1, h2, h3, section, input, textarea, ul, li, button {
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', sans-serif !important;
+  // font-size: 1.8vh !important;
+  font-style: normal;
+  text-shadow: none;
+  box-sizing: border-box;
+}
+
+* {
+  outline: none;
+}
+
+.ant-btn-lg {
+  line-height: 1vh !important;
+}

@@ -1,0 +1,24 @@
+@import '@/styles/consts.scss';
+
+.table_wrapper {
+  display: flex;
+  flex-direction: column;
+  
+  overflow-y: scroll;
+  flex: 12;
+  width: 100%;
+  margin-top: 5px;
+
+  padding-left: 5px;
+  padding-right: 5px;
+  // display: flex;
+  // align-items: start;
+  // flex-direction: column;
+  // justify-content: start;
+
+  // width: 100%;
+  // margin-top: 15px;
+  // padding-left: 5px;
+  // height: 100%;
+  
+}

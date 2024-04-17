@@ -1,0 +1,35 @@
+$grey: #fafafa;
+$borderGrey: #f0f0f0;
+$blue: #1890ff;
+$darkBlue: #096dd9;
+$green: rgb(26, 142, 26);
+$red: red;
+$silverGrey: rgb(149, 149, 149);
+$someColor: #ff004c;
+
+@mixin vision {
+  &-show {
+    opacity: 1;
+    z-index: 1;
+    transition: opacity 0.3s ease-in-out;    
+  }
+  &-hide {
+    opacity: 0;
+    z-index: 0;
+    transition: opacity 0.3s ease-in-out;
+  }
+}
+
+@mixin modal($minH) {
+  width: 100%;
+  min-height: $minH;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+@mixin icon { // накинь на все иконки
+  width: fit-content;
+  height: fit-content;
+  cursor: pointer;
+}

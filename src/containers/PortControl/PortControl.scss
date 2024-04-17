@@ -1,0 +1,35 @@
+@import "@/styles/consts.scss";
+
+.portControl {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+  margin-top: 5px;
+  margin-left: 5px;
+  &_label {
+    color: $darkBlue;
+    margin-right: 5px;
+  }
+
+  &_baudrateInput {
+    margin-left: 5px;
+    margin-right: 5px;
+  }
+
+  &_status {
+    margin-left: 15px;
+    &__connected {
+      color: $green;
+    }
+    &__error {
+      color: $red;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  }
+
+  &_conBtn {
+    width: 90px;
+  }
+}
