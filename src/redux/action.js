@@ -47,6 +47,7 @@ export const fakeUpdateTable = () => async (dispatch, getState) => {
 }
 
 export const downloadData = (api, notifApi) => async (dispatch, getState) => {
+  // сохранение данных в Excel на стороне Rust
   const {main: { tableStorage }} = getState();
   let resStorage = tableStorage.map(({serialNumb, timeInNiceView, payload}) => {
     return [serialNumb+'', timeInNiceView+'', payload+'']
