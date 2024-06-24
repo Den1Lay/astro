@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import cx from 'classnames'
 import { getPorts, setPort, setBaudrate, portAction } from '@/redux/action';
-import { Select, Input, Dropdown, Button, notification } from 'antd';
+import { Select, Input, Dropdown, Button, notification, message } from 'antd';
 import { openNotificationWithIcon } from '@/utils';
 
 import './PortControl.scss';
@@ -17,9 +17,10 @@ const PortControl = ({
   getPorts,
   setPort,
   setBaudrate,
-  portAction
+  portAction,
 }) => {
   const [api, contextHolder] = notification.useNotification();
+  const [messageApi, messageContextHolder] = message.useMessage();
 
   // Эффекты на выставление дефолтного порта
   const [initGetPorts, setInitGetPorts] = useState(false);
@@ -43,6 +44,7 @@ const PortControl = ({
   const {text, css, conBtn, inputState} = portStatusLabelObj[portStatus];
   return (
   <div className="portControl">
+    {messageContextHolder}
     {contextHolder}
     <span className="portControl_label">
       Порт: 
@@ -59,34 +61,10 @@ const PortControl = ({
       onChange={val => setPort(val)}
       options={ports.map(el => ({value: el, label: el}))}
     />
-    <Dropdown
-      disabled={!inputState}
-      trigger={['click']}
-      menu={{items: 
-        [1200, 9600, 57600, 115200].map((n, i) => ({
-          key: i+'',
-          label: (<a onClick={() => setBaudrate(n)}>
-            {n+''}
-          </a>)
-        }))
-    }}
-    >
-    <Input
-      
-      className="portControl_baudrateInput"
-      value={baudrate > 0 ? baudrate : ""}
-      type="text" 
-      style={{ width: 100 }}
-      size="middle"
-      placeholder="скорость"
-      onChange={v => setBaudrate(+v.target.value)}
-    />
-    </Dropdown>
-
     <Button
       className="portControl_conBtn"
       type="default" 
-      onClick={()=>portAction(api)} 
+      onClick={()=>portAction(api, messageApi)} 
     >
       {conBtn}
     </Button>

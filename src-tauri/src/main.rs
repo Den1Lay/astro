@@ -28,7 +28,7 @@ pub struct COM {
 impl COM {
 	pub fn new() -> Self {
 		return COM { port: None };
-	}
+	} 
 
 	pub fn open(&mut self, portname: String, baudrate: u32) -> String {
 		let databits = DataBits::Eight;

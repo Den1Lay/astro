@@ -20,7 +20,7 @@
     "windows": [
       {
         "title": "tauri_serial",
-        "width": 800,
+        "width": 900,
         "height": 600
       }
     ],

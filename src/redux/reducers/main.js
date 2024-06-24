@@ -3,41 +3,36 @@ import {
   GET_PORTS, 
   SET_BAUDRATE,
   SET_PORT_STATE,
-  SET_SCAN,
-  GET_CONFIG,
-  SET_LOC_CONFIG,
-  WRITE_CONFIG,
-  DEG_SECONDS_AND_CHECK,
-  CLEAN_TABLE
+  SET_DEVICE_CONTROL,
+  SET_MANUAL_CONTROL_BLOCK,
+  SET_IMPULS_TIME,
+  SET_AUTO_CONTROL_STATE,
+  SET_STAGE_TIME,
+  SET_STAGE_STATUS,
+  RESET_STAGES
+
  } from '../actionTypes'
 
 const initialState = {
   ports: [],
   selectedPort: "",
-  baudrate: 1200,
+  baudrate: 115200,
   portStatus: 'disconnected', // connected, error
   portEr: 'Ok',
-  scanStatus: false,
-  config: {
-    radioFreq: 10000,
-    sf: "SF7",
-    bw:  125,
-    scanTime: 1,
-    transmitPower: 1,
-    openWindowTime: 1,
-  },
-  locConfig: {
-    radioFreq: 10000,
-    sf: "SF7",
-    bw:  125,
-    scanTime: 1,
-    transmitPower: 1,
-    openWindowTime: 1,
-    isSetted: false,
-  },
-  seconds: 0,
-  leftTime: 0,
-  tableStorage: [],
+  deviceEr: null,
+  deviceControl: null,
+  impulsTime: 1,
+  manualControlBlock: false,
+  autoControlState: false,
+  stage1startComplete: false, 
+  stage1endComplete: false,
+  stage2startComplete: false, 
+  stage2endComplete: false,
+
+  stage1start: 23*60*60+10*60+5,
+  stage1end: 0*60*60+5*60+0,
+  stage2start: 5*60*60+0*60+0,
+  stage2end: 6*60*60+6*60+6,
   v: 0,
 };
 
@@ -62,121 +57,80 @@ export default function(state=initialState, {type, payload=null}) {
     }
     case SET_PORT_STATE: {
       return (() => {
-        const { newPortStatus, er } = payload;
+        const { newPortStatus, er, deviceEr } = payload;
         return {
           ...state,
           portStatus: newPortStatus,
           portEr: er,
-          scanStatus: false
+          scanStatus: false,
+          deviceControl: null,
+          deviceEr
         }
       })()
     }
-    case SET_SCAN: {
-      return {
-        ...state, 
-        scanStatus: !state.scanStatus,
-        seconds: !state.scanStatus ? 0 : state.seconds,
-        leftTime: !state.scanStatus ? state.config.scanTime*60 : state.leftTime
-      }
-    }
 
-    case GET_CONFIG: {
+    case SET_DEVICE_CONTROL: {
       return (() => {
-        function getHex(ar) {
-          return ar.map(el => {
-            const elHex = el.toString(16).toUpperCase();
-            return elHex.length < 2 ? "0"+elHex : elHex;
-          })
-        }
-
-        const radioFreq = getHex(payload.slice(3, 7));
-        const altRadioParam = getHex(payload.slice(7, 8));
-        const openWindowTime = getHex(payload.slice(8, 9));
-        const scanTime = getHex(payload.slice(9, 10));
-        const transmitPower = getHex(payload.slice(10, 11));
-
-        const numbAltRadio = parseInt(altRadioParam, 16);
-        const sf = numbAltRadio & 0b00000111;
-        const bw = numbAltRadio >> 3;
-
-        const consoleObj = {sf, bw};
-        consoleObj['radioFreq'] = parseInt(radioFreq.reverse().join(''), 16);
-        consoleObj.scanTime = parseInt(scanTime, 16);
-        consoleObj.transmitPower = parseInt(transmitPower, 16);
-        consoleObj.openWindowTime = parseInt(openWindowTime, 16);
-
-        function getFormatedObj(obj) {
-          Object.keys(obj).forEach((key) => {
-            let setValue = obj[key];
-            switch (key) {
-              case 'radioFreq':
-                setValue = setValue/1000;
-                break
-              case 'sf':
-                setValue = `SF${6+setValue}`;
-                break
-              case 'bw':
-                const table = ['125', '250', '500'];
-                setValue = +table[setValue];
-                break
-              default:
-                break
-            }
-            obj[key] = setValue;
-          })
-
-          return obj;
-        }
-        
-        const dataObj = getFormatedObj(consoleObj);
-        dataObj.isSetted = true;
+        const resDeviceControl = state.deviceControl === payload ? null : payload;
         return {
-          ...state,
-          config: dataObj,
-          locConfig: state.locConfig.isSetted ? state.locConfig : dataObj
+          ...state, 
+          deviceControl: resDeviceControl,
+          autoControlState: resDeviceControl === null ? false : state.autoControlState
         }
-      })()
+      })();
     }
 
-    case SET_LOC_CONFIG: {
-      return {
-        ...state, 
-        locConfig: payload
-      }
-    }
-
-    case WRITE_CONFIG: {
+    case SET_MANUAL_CONTROL_BLOCK: {
       return {
         ...state,
-        config: state.locConfig
+        manualControlBlock: payload
+      };
+    }
+
+    case SET_IMPULS_TIME: {
+      return {
+        ...state,
+        impulsTime: payload
       }
     }
 
-    case DEG_SECONDS_AND_CHECK: {
+    case SET_AUTO_CONTROL_STATE: {
       return (() => {
-        let { leftTime, seconds, scanStatus } = state;
-        leftTime = leftTime - 1;
-        seconds = seconds + 1;
-        if(leftTime === 0) {
-          scanStatus = false;
-        }
-
         return {
           ...state,
-          leftTime,
-          seconds,
-          tableStorage: payload,
-          scanStatus,
-          v: Math.random(),
+          autoControlState: !state.autoControlState,
+          stage1startComplete: false, 
+          stage1endComplete: false,
+          stage2startComplete: false, 
+          stage2endComplete: false,
+        }
+      })();
+    }
+
+    case SET_STAGE_TIME: {
+      return (() => {
+        return {
+          ...state,
+          ...payload
         }
       })()
     }
 
-    case CLEAN_TABLE: {
+    case SET_STAGE_STATUS: {
+      return (() => {
+        let res = state;
+        res[payload] = true;
+        return res
+      })()
+    }
+
+    case RESET_STAGES: {
       return {
-        ...state, 
-        tableStorage: [],
-        v: Math.random()
+        ...state,
+        stage1startComplete: false, 
+        stage1endComplete: false,
+        stage2startComplete: false, 
+        stage2endComplete: false,
       }
     }
     default:

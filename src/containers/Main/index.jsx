@@ -1,7 +1,7 @@
 import React from "react";
 import { useEffect } from "react";
 import cx from 'classnames';
-import { PortControl, ScanControl, TableControl, Table } from '@/containers'
+import { PortControl, Manual, Auto, TimeControl } from '@/containers'
 import { TableLine } from '@/components';
 
 import "./Main.scss";
@@ -14,21 +14,21 @@ export default function Main() {
         <PortControl />
       </div>
       <div className="main__line">
-        <ScanControl />
+        <Manual />
       </div>
       <div className="main__line">
-        <TableControl />
+        <Auto />
       </div>
-      <div className={("main__line", "table_header")}>
-        <TableLine />
-        <div className="table_header__snap">
+      <div className="main__line">
+        <TimeControl />
+      </div>
+      {/* <div className={("main__line", "table_header")}>
 
-        </div>
-      </div>
+      </div> */}
       {/* <div className="main__table">
         
       </div> */}
-      <Table />
+
     </section>
   );
 }

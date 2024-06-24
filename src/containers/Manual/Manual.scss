@@ -1,8 +1,8 @@
-.scanControl {
+.manual {
   display: flex;
   align-items: center;
   justify-content: space-between;
-
+  height: fit-content;
   width: 100%;
   margin-top: 5px;
   margin-left: 5px;
@@ -12,10 +12,15 @@
       margin-right: 15px;
       width: 70px;
     }
+    &__switch {
+      margin-left: 5px;
+      margin-right: 5px;
+    }
   }
   &_right {
-    &__configBtn{
-      margin-right: 10px;
+    margin-right: 10px;
+    &__title {
+      margin-right: 5px;
     }
   }
 }

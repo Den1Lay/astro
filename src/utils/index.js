@@ -1,5 +1,3 @@
-import XLSX from "xlsx";
-
 export const openNotificationWithIcon = ({api, type, message, description}) => {
   api[type]({
     message,
