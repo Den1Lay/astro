@@ -8,6 +8,7 @@ import {
   SET_STAGE_TIME,
   SET_STAGE_STATUS,
   RESET_STAGES,
+  TOGGLE_LIGHT_STATUS,
   
   GET_PORTS,
   SET_PORT_STATE
@@ -145,14 +146,69 @@ export const portAction = (api, messageApi) => async (dispatch, getState) => {
   })
 }
 
+export const lightControl = (api) => async (dispatch, getState) => {
+  const { lightStatus } = getState().main;
+
+  let checkRes = [];
+  let initPass = [];
+
+  if(!lightStatus) {
+    // on
+    initPass = [0xF9, 0x10, 0x00, 0x02, 0x00, 0x01, 0x01, 0x00];
+    checkRes = [0xF9, 0x10, 0x00, 0x02, 0x00, 0x01, 0xB5, 0xB1];
+  } else {
+    // off
+    initPass = [0xF9, 0x10, 0x00, 0x02, 0x00, 0x01, 0x01, 0x01];
+    checkRes = [0xF9, 0x10, 0x00, 0x02, 0x00, 0x01, 0xB5, 0xB1];
+  }
+
+  const write_er = await writeReg(initPass, '0002');
+  if(write_er === 'Ok') {
+    // следующий шаг
+    await sequenceDelay(100);
+    const raw = await readReg();
+    const er = reqMiddle(raw);
+    if(er) {
+      const { message, description } = er;
+      openNotificationWithIcon({api, type: 'error', message, description});
+      return
+    }
+    // check raw
+    let deathFlag = false;
+    checkRes.forEach((el, i) => {
+      if(raw[i] !== el) {
+        deathFlag = true;
+      }
+    });
+    if(deathFlag) {
+      openNotificationWithIcon({api, type:"error", message: "Неверный ответ", description: "Ответ прибора не соответствует ожидаемому"});
+      return;
+    }
+    dispatch({
+      type: TOGGLE_LIGHT_STATUS
+    });
+  } else {
+    openNotificationWithIcon({api, type: 'error', message: "Ошибка записи регистра", description: write_er})
+  }
+
+}
+
+
 export const manualControl = (api, stageName = null) => async (dispatch, getState) => {
-  const { portStatus, impulsTime } = getState().main;
+  const { portStatus, impulsTime, ...state } = getState().main;
   const initPass = [0xF9, 0x10, 0x00, 0x01, 0x00, 0x01, 0x01, 0x00];
   if(stageName) {
-    dispatch({
-      type: SET_STAGE_STATUS,
-      payload: stageName
-    });
+    if(state[stageName] !== true) {
+      dispatch({
+        type: SET_STAGE_STATUS,
+        payload: stageName
+      });
+    }
+    
+    // const initPass = [0xF9, 0x10, 0x00, 0x02, 0x00, 0x01, 0x01, 0x00];
+    // const checkRes = [0xF9, 0x10, 0x00, 0x02, 0x00, 0x01, 0xB5, 0xB1];
+    // lightHandler(api, initPass, checkRes, dispatch);
+    // await sequenceDelay(5000);
   };
 
   dispatch({

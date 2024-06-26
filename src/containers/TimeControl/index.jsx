@@ -92,7 +92,7 @@ const TimeControl = ({
       {contextHolder}
       <div className="timeControl_left">
         <span className="timeControl_left__title">
-            {"Время пуска - остановки 1 этапа, ч:м:"}
+            {"Время пуска - остановки 1 этапа, ч:м:c"}
         </span>
         <TimePicker
           status={stage1startComplete ? "warning" : ''}
@@ -115,7 +115,7 @@ const TimeControl = ({
 
       <div className="timeControl_left second_el">
         <span className="timeControl_left__title">
-          {"Время пуска - остановки 2 этапа, ч:м:"}
+          {"Время пуска - остановки 2 этапа, ч:м:c"}
         </span>
         <TimePicker
           status={stage2startComplete ? "warning" : ''}

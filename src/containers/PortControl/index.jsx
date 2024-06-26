@@ -13,6 +13,7 @@ const PortControl = ({
   baudrate,
   portStatus,
   portEr,
+  manualControlBlock,
 
   getPorts,
   setPort,
@@ -65,6 +66,7 @@ const PortControl = ({
       className="portControl_conBtn"
       type="default" 
       onClick={()=>portAction(api, messageApi)} 
+      disabled={manualControlBlock}
     >
       {conBtn}
     </Button>
@@ -78,7 +80,7 @@ const PortControl = ({
 }
 
 export default connect(
-  ({main: {ports, selectedPort, baudrate, portStatus, portEr}}) => 
-  ({ports, selectedPort, baudrate, portStatus, portEr}), 
+  ({main: {ports, selectedPort, baudrate, portStatus, portEr, manualControlBlock}}) => 
+  ({ports, selectedPort, baudrate, portStatus, portEr, manualControlBlock}), 
   ({ getPorts, setPort, setBaudrate, portAction })
 )(PortControl)

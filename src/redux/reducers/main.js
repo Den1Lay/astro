@@ -9,7 +9,8 @@ import {
   SET_AUTO_CONTROL_STATE,
   SET_STAGE_TIME,
   SET_STAGE_STATUS,
-  RESET_STAGES
+  RESET_STAGES,
+  TOGGLE_LIGHT_STATUS
 
  } from '../actionTypes'
 
@@ -33,6 +34,8 @@ const initialState = {
   stage1end: 0*60*60+5*60+0,
   stage2start: 5*60*60+0*60+0,
   stage2end: 6*60*60+6*60+6,
+
+  lightStatus: false,
   v: 0,
 };
 
@@ -131,6 +134,18 @@ export default function(state=initialState, {type, payload=null}) {
         stage1endComplete: false,
         stage2startComplete: false, 
         stage2endComplete: false,
+      }
+    }
+
+    case TOGGLE_LIGHT_STATUS: {
+
+      let payState = null;
+      if(payload) {
+        payState = payload.state;
+      }
+      return {
+        ...state,
+        lightStatus: payState ? payState : !state.lightStatus
       }
     }
     default:

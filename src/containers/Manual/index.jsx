@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { connect } from "react-redux";
 import cx from 'classnames'
 import { Button, notification, Switch, InputNumber } from 'antd';
-import { setDeviceControl, manualControl, setImpulsTime } from "@/redux/action";
+import { setDeviceControl, manualControl, setImpulsTime, lightControl } from "@/redux/action";
 
 import "./Manual.scss";
 
@@ -12,10 +12,12 @@ const Manual = ({
   manualControlBlock,
   impulsTime,
   deviceEr,
+  lightStatus,
 
   setDeviceControl,
   manualControl,
   setImpulsTime,
+  lightControl
 }) => {
   const disableFlag = portStatus === 'connected';
   const [api, contextHolder] = notification.useNotification();
@@ -44,6 +46,15 @@ const Manual = ({
         >
           {"Реле"}
         </Button>
+        <Button
+          style={{marginLeft: 5, width: 140}}
+          disabled={!disableFlag || deviceControl !== "manual"}
+          className="scanControl_left__startBtn"
+          type={!lightStatus ? "primary" : "default"} 
+          onClick={() => lightControl(api)} 
+        >
+          {`${!lightStatus ? "Вкл" : "Откл"}  освещение`}
+        </Button>
       </div>
       <div className="manual_right">
         <span className="manual_right__title">Время импульса, с</span>
@@ -60,7 +71,7 @@ const Manual = ({
 }
 
 export default connect(
-  ({main: { portStatus, deviceControl, manualControlBlock, impulsTime, deviceEr }}) =>
-  ({ portStatus, deviceControl, manualControlBlock, impulsTime, deviceEr }),
-  ({ setDeviceControl, manualControl, setImpulsTime })
+  ({main: { portStatus, deviceControl, manualControlBlock, impulsTime, deviceEr, lightStatus }}) =>
+  ({ portStatus, deviceControl, manualControlBlock, impulsTime, deviceEr, lightStatus }),
+  ({ setDeviceControl, manualControl, setImpulsTime, lightControl })
 )(Manual)
