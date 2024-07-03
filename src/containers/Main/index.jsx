@@ -13,13 +13,13 @@ export default function Main() {
       <div className="main__top">
         <PortControl />
       </div>
-      <div className="main__line">
+      <div className="main__line main__shift_top">
         <Manual />
       </div>
-      <div className="main__line">
+      <div className="main__line main__shift_top">
         <Auto />
       </div>
-      <div className="main__line">
+      <div className="main__line ">
         <TimeControl />
       </div>
       {/* <div className={("main__line", "table_header")}>

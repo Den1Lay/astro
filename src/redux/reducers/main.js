@@ -10,7 +10,11 @@ import {
   SET_STAGE_TIME,
   SET_STAGE_STATUS,
   RESET_STAGES,
-  TOGGLE_LIGHT_STATUS
+  TOGGLE_LIGHT_STATUS,
+  SET_SEQUENCE_NAME,
+  SET_SEQUENCE_STATE,
+  SET_AUTO_LOOP_STATE,
+  SET_LIGHT_TIME_DELAY,
 
  } from '../actionTypes'
 
@@ -36,6 +40,14 @@ const initialState = {
   stage2end: 6*60*60+6*60+6,
 
   lightStatus: false,
+  sequenceName: "",
+  sequenceStartTime: 0,
+  s0: false,
+  s1: false,
+  s2: false,
+
+  autoLoopState: false,
+  lightTimeDelay: 40,
   v: 0,
 };
 
@@ -78,7 +90,10 @@ export default function(state=initialState, {type, payload=null}) {
         return {
           ...state, 
           deviceControl: resDeviceControl,
-          autoControlState: resDeviceControl === null ? false : state.autoControlState
+          autoControlState: resDeviceControl === null ? false : state.autoControlState,
+          stage1startComplete: false, 
+          stage1endComplete: false,
+          
         }
       })();
     }
@@ -148,6 +163,42 @@ export default function(state=initialState, {type, payload=null}) {
         lightStatus: payState ? payState : !state.lightStatus
       }
     }
+
+    case SET_SEQUENCE_NAME: {
+      return {
+        ...state,
+        sequenceName: payload,
+        sequenceStartTime: Date.now(),
+        s0: false,
+        s1: false,
+        s2: false,
+      }
+    }
+
+    case SET_SEQUENCE_STATE: {
+      state[payload] = true;
+      if(payload === "s2") {
+        state.sequenceName = "";
+      }
+      return {
+        ...state,
+      }
+    }
+
+    case SET_AUTO_LOOP_STATE: {
+      return {
+        ...state,
+        autoLoopState: !state.autoLoopState
+      }
+    }
+
+    case SET_LIGHT_TIME_DELAY: {
+      return {
+        ...state, 
+        lightTimeDelay: payload
+      }
+    }
+
     default:
       return state
   }

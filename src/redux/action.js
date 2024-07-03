@@ -9,6 +9,10 @@ import {
   SET_STAGE_STATUS,
   RESET_STAGES,
   TOGGLE_LIGHT_STATUS,
+  SET_SEQUENCE_NAME,
+  SET_SEQUENCE_STATE,
+  SET_AUTO_LOOP_STATE,
+  SET_LIGHT_TIME_DELAY,
   
   GET_PORTS,
   SET_PORT_STATE
@@ -63,6 +67,20 @@ export const setStageTime = payload => ({
 
 export const resetStages = () => ({
   type: RESET_STAGES
+})
+
+export const setSequenceName = name => ({
+  type: SET_SEQUENCE_NAME,
+  payload: name
+});
+
+export const setAutoLoopState = () => ({
+  type: SET_AUTO_LOOP_STATE
+})
+
+export const setLightTimeDelay = payload => ({
+  type: SET_LIGHT_TIME_DELAY,
+  payload
 })
 
 export const portAction = (api, messageApi) => async (dispatch, getState) => {
@@ -146,20 +164,38 @@ export const portAction = (api, messageApi) => async (dispatch, getState) => {
   })
 }
 
-export const lightControl = (api) => async (dispatch, getState) => {
+export const lightControl = (api, pass = null, s = null) => async (dispatch, getState) => {
   const { lightStatus } = getState().main;
 
   let checkRes = [];
   let initPass = [];
 
-  if(!lightStatus) {
-    // on
-    initPass = [0xF9, 0x10, 0x00, 0x02, 0x00, 0x01, 0x01, 0x00];
-    checkRes = [0xF9, 0x10, 0x00, 0x02, 0x00, 0x01, 0xB5, 0xB1];
+  if(s) {
+    dispatch({
+      type: SET_SEQUENCE_STATE, 
+      payload: s
+    })
+  }
+
+  if (pass) {
+    if(pass === 2) {
+      initPass = [0xF9, 0x10, 0x00, 0x02, 0x00, 0x01, 0x01, 0x00];
+      checkRes = [0xF9, 0x10, 0x00, 0x02, 0x00, 0x01, 0xB5, 0xB1];
+    }
+    if (pass === 1) {
+      initPass = [0xF9, 0x10, 0x00, 0x02, 0x00, 0x01, 0x01, 0x01];
+      checkRes = [0xF9, 0x10, 0x00, 0x02, 0x00, 0x01, 0xB5, 0xB1];
+    }
   } else {
-    // off
-    initPass = [0xF9, 0x10, 0x00, 0x02, 0x00, 0x01, 0x01, 0x01];
-    checkRes = [0xF9, 0x10, 0x00, 0x02, 0x00, 0x01, 0xB5, 0xB1];
+    if(!lightStatus) {
+      // on
+      initPass = [0xF9, 0x10, 0x00, 0x02, 0x00, 0x01, 0x01, 0x00];
+      checkRes = [0xF9, 0x10, 0x00, 0x02, 0x00, 0x01, 0xB5, 0xB1];
+    } else {
+      // off
+      initPass = [0xF9, 0x10, 0x00, 0x02, 0x00, 0x01, 0x01, 0x01];
+      checkRes = [0xF9, 0x10, 0x00, 0x02, 0x00, 0x01, 0xB5, 0xB1];
+    }
   }
 
   const write_er = await writeReg(initPass, '0002');
@@ -194,7 +230,7 @@ export const lightControl = (api) => async (dispatch, getState) => {
 }
 
 
-export const manualControl = (api, stageName = null) => async (dispatch, getState) => {
+export const manualControl = (api, stageName = null, s = null) => async (dispatch, getState) => {
   const { portStatus, impulsTime, ...state } = getState().main;
   const initPass = [0xF9, 0x10, 0x00, 0x01, 0x00, 0x01, 0x01, 0x00];
   if(stageName) {
@@ -210,6 +246,13 @@ export const manualControl = (api, stageName = null) => async (dispatch, getStat
     // lightHandler(api, initPass, checkRes, dispatch);
     // await sequenceDelay(5000);
   };
+
+  if(s) {
+    dispatch({
+      type: SET_SEQUENCE_STATE, 
+      payload: s
+    })
+  }
 
   dispatch({
     type: SET_MANUAL_CONTROL_BLOCK,
@@ -275,8 +318,6 @@ export const manualControl = (api, stageName = null) => async (dispatch, getStat
   } else {
     openNotificationWithIcon({api, type: 'error', message: "Ошибка записи регистра", description: write_er})
   }
-
-
 }
 
 

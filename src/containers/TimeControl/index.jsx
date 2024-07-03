@@ -3,9 +3,20 @@ import dayjs from 'dayjs';
 import { connect } from "react-redux";
 import cx from 'classnames'
 import { Button, notification, Switch, InputNumber, TimePicker  } from 'antd';
-import { setDeviceControl, setAutoControlState, setStageTime, manualControl, resetStages } from "@/redux/action";
+import { 
+  setDeviceControl, 
+  setAutoControlState, 
+  setStageTime, 
+  manualControl, 
+  resetStages, 
+  setSequenceName, 
+  lightControl, 
+  setAutoLoopState,
+  setLightTimeDelay 
+} from "@/redux/action";
 
 import "./TimeControl.scss";
+
 
 const TimeControl = ({
   stage1start, 
@@ -18,11 +29,23 @@ const TimeControl = ({
   stage2startComplete, 
   stage2endComplete,
 
+  sequenceName,
+  sequenceStartTime,
+  s0,
+  s1,
+  s2,
+  autoLoopState,
+
   autoControlState,
+  lightTimeDelay,
 
   setStageTime,
   manualControl,
-  resetStages
+  resetStages,
+  setSequenceName,
+  lightControl,
+  setAutoLoopState,
+  setLightTimeDelay
 }) => {
   const [api, contextHolder] = notification.useNotification();
   
@@ -41,7 +64,8 @@ const TimeControl = ({
 
   useEffect(() => {
     function tick() {
-      var data = new Date();
+      // var data = new Date();
+      var data = new Date(2011, 0, 1, 5, 0, 0);
       const hours = data.getHours();
       const minutes = data.getMinutes();
       const secs = data.getSeconds();
@@ -60,26 +84,45 @@ const TimeControl = ({
 
       // console.log(stage1startComplete, stage1timeDiff);
       // check stage1
-      if(!stage1startComplete && stage1startTimeDiff === 0) {
-        manualControl(api, "stage1startComplete");
+      if(!sequenceName && stage1startTimeDiff === 0 && !stage1startComplete ) {
+        // manualControl(api, "stage1startComplete");
+        setSequenceName("stage1startComplete");
+
       }
-      if(!stage1endComplete && stage1endTimeDiff === 0) {
-        manualControl(api, "stage1endComplete");
+      if(!sequenceName && stage1endTimeDiff === 0 && !stage1endComplete) {
+        // manualControl(api, "stage1endComplete");
+        setSequenceName("stage1endComplete");
       }
 
-      if(!stage2startComplete && stage2startTimeDiff === 0) {
-        manualControl(api, "stage2startComplete");
-      }
-      if(!stage2endComplete && stage2endTimeDiff === 0) {
-        manualControl(api, "stage2endComplete");
-      }
+      // if(!sequenceName && stage2startTimeDiff === 0) {
+      //   // manualControl(api, "stage2startComplete");
+      //   setSequenceName("stage2startComplete");
+      // }
+      // if(!sequenceName && stage2endTimeDiff === 0) {
+      //   // manualControl(api, "stage2endComplete");
+      //   setSequenceName("stage2endComplete");
+      // }
 
       // восстановление всех зарядов
       if(
-        [stage1startTimeDiff, stage1endTimeDiff, stage2startTimeDiff, stage2endTimeDiff].every(el => el !== 0) &&
-        stage1startComplete && stage1endComplete && stage2startComplete && stage2endComplete
+        [stage1startTimeDiff, stage1endTimeDiff].every(el => el !== 0) &&
+        stage1startComplete && stage1endComplete && autoLoopState
       ) {
         resetStages()
+      }
+
+      // sequence controller
+      if(sequenceName) {
+        const curTimeDif = Date.now() - sequenceStartTime;
+        if(!s0) {
+          lightControl(api, 2, "s0");
+        }
+        if(!s1 && curTimeDif > 5000) {
+          manualControl(api, sequenceName, "s1");
+        }
+        if(!s2 && curTimeDif > ~~(lightTimeDelay*1000) + 5000) {
+          lightControl(api, 1, "s2");
+        }
       }
     }
 
@@ -92,14 +135,14 @@ const TimeControl = ({
       {contextHolder}
       <div className="timeControl_left">
         <span className="timeControl_left__title">
-            {"Время пуска - остановки 1 этапа, ч:м:c"}
+            {"Время начала ч:м:c"}
         </span>
         <TimePicker
           status={stage1startComplete ? "warning" : ''}
           disabled={false}
           className={"timeControl_left__start"}
           style={{width: 100}}
-          onChange={v => { console.log(v); localStateObj.stage1start = v["$H"]*60*60+ v["$m"]*60 +v["$s"]; setStageTime(localStateObj); }} 
+          onChange={v => {if (v) {localStateObj.stage1start = v["$H"]*60*60+ v["$m"]*60 +v["$s"]; setStageTime(localStateObj);}}} 
           value={dayjs(getStrTime(stage1start), format)} 
           format={format} />
 
@@ -107,13 +150,28 @@ const TimeControl = ({
           status={stage1endComplete ? "warning" : ''}
           disabled={false}
           style={{width: 100}}
-          onChange={v => { localStateObj.stage1end = v["$H"]*60*60+ v["$m"]*60 +v["$s"]; setStageTime(localStateObj);}} 
+          onChange={v => {if (v) {localStateObj.stage1end = v["$H"]*60*60+ v["$m"]*60 +v["$s"]; setStageTime(localStateObj);}}} 
           value={dayjs(getStrTime(stage1end), format)} 
           format={format} />
-
+        <Button
+          onClick={setAutoLoopState}
+          style={{marginLeft: 5}}
+          type={!autoLoopState ? "primary" : "default"}>
+          {!autoLoopState ? "Вкл цикл" : "Откл цикл"}
+        </Button>
       </div>
-
-      <div className="timeControl_left second_el">
+      <div className="timeControl_right">
+        <span className="timeControl_right__title">Длительность освещения, с</span>
+        <InputNumber
+          // style={{ width: 200 }}
+          value={lightTimeDelay}
+          step="0.1"
+          min={5}
+          onChange={(v) => setLightTimeDelay(v)}
+          stringMode
+        />
+      </div>
+      {/* <div className="timeControl_left second_el">
         <span className="timeControl_left__title">
           {"Время пуска - остановки 2 этапа, ч:м:c"}
         </span>
@@ -134,7 +192,7 @@ const TimeControl = ({
           value={dayjs(getStrTime(stage2end), format)} 
           format={format} />
         
-      </div>
+      </div> */}
       {/* <div className="timeControl_right">
      
         </div> */}
@@ -152,7 +210,14 @@ export default connect(
     stage1endComplete,
     stage2startComplete, 
     stage2endComplete,
-    autoControlState 
+    autoControlState,
+    sequenceName,
+    sequenceStartTime,
+    s0,
+    s1,
+    s2,
+    autoLoopState,
+    lightTimeDelay,
   }}) =>
   ({ 
     stage1start, 
@@ -163,7 +228,14 @@ export default connect(
     stage1endComplete,
     stage2startComplete, 
     stage2endComplete,
-    autoControlState
+    autoControlState,
+    sequenceName,
+    sequenceStartTime,
+    s0,
+    s1,
+    s2,
+    autoLoopState,
+    lightTimeDelay,
    }),
-  ({ setStageTime, manualControl, resetStages })
+  ({ setStageTime, manualControl, resetStages, setSequenceName, lightControl, setAutoLoopState, setLightTimeDelay })
 )(TimeControl)
